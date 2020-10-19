@@ -133,7 +133,9 @@ void setup(){
   USBDevice.setManufacturerDescriptor(mfgstr);
   USBDevice.setProductDescriptor(prodstr);
 */
-	Serial.begin(115200);
+  Serial.begin(115200); // Teensy USB w/breakout - for debugging / power
+  Serial1.begin(57600); // FTDI breakout connected to TX1,RX1,GND of Teensy - for communication with Teletype
+  // OPTIONAL: You can change the baudrate of Serial1 to 115200, if you do the same in the Teletype firmware
   
   mdp.isMonome = true;
   mdp.deviceID = deviceID;
@@ -143,11 +145,11 @@ void setup(){
 
   trellis.begin();
   
-/*	if(!trellis.begin()){
-		Serial.println("failed to begin trellis");
-		while(1);
-	}
-*/
+  if(!trellis.begin()){
+	Serial.println("failed to begin trellis");
+	while(1);
+  }
+
   // set overall brightness for all pixels
   uint8_t x, y;
   for (x = 0; x < NUM_COLS / 4; x++) {
@@ -183,6 +185,7 @@ void setup(){
   delay(100);
   trellis.setPixelColor(0, 0x000000);
   trellis.show();
+  Serial.println("Grid running.");
 }
 
 // ***************************************************************************
