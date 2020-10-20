@@ -93,7 +93,7 @@ Start up the grid and connect the breakout to the Teletype. Voila.
 
 ### Special thanks to 
 
-@okyeron, @frankchannel 
+@forestcaver, @okyeron, @frankchannel 
 
 ### FAQ
 
