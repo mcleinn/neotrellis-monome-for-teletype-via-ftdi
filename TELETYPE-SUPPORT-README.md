@@ -38,7 +38,7 @@ Later you might want to integrate this second port in the Grid.
 
 ### Changing the Teensy Grid firmware
 
-You can skip the following steps, if you are using the branched DIY Grid firmware for Teletype found in this repository. This section is for those who want to repeat the mod based on more current versions of the DIY Grid.
+**You can skip the following steps, if you are using the branched DIY Grid firmware for Teletype [found in this repository](neotrellis_monome_teensy/)**. This section is left for those who want to repeat the mod based on more current versions of the DIY Grid.
 
 First open the Neotrellis Grid Teensy firmware “neotrellis_monome_teensy” in the Arduino IDE.
 In the first tab, look for Serial.begin(115200); and add a Serial1.begin(57600); under it.
@@ -78,7 +78,7 @@ and replace it with
 
 ### Flashing the firmware with Teletype support
 
-Start the IDE and load the modified firmware on the Teensy. Alternatively, you can flash the supplied .hex files.
+Start the IDE and load the modified firmware on the Teensy. Alternatively, you can flash [the supplied .hex](neotrellis_monome_teensy/neotrellis_monome_teensy_16x8_ftdi_teletype_57600.hex) files.
 
 Write some simple Teletype Grid script in your Teletype, such as described in “[Teletype Grid Studies](https://github.com/scanner-darkly/teletype/wiki/BASIC-VISUALIZATIONS)”. Use ALT-G to verify if the grid inside the Teletype is set up correctly.
 
