@@ -1,156 +1,106 @@
-# neotrellis monome compatible grid
-
-**Status**: work in progress. Not exactly noob friendly just yet.
-
-## What is it?
-
-Code to use a set of [Adafruit NeoTrellis boards](https://www.adafruit.com/product/3954) as a monome grid clone.
-
-Tested mostly using a Teensy 3.2 microcontroller. 
-
-There is code for using an Adafruit ItsyBitsy M0 (and by extension the Feather M0/M4), but this requires some changes to the underlying libraries (replacing the Adafruit_USBD_Device library deep in the adafruit/arduino core libraries).
-
-Compiled firmware for Feather M4 and ItsyBitsy M0 coming soon.
-
-## compatibility
-
-### Max or other computer-based applications
-
-At the time of writing, this code works as expected with the neotrellis-grid connected to a computer with Max running monome patches.
-
-### ansible/ trilogy modules
-
-Does not work. Don’t ask (unless you know C well and can help me make changes to libavr32).
-
-### norns /norns shield
-
-Officially unsupported. Hacking required. Proceed at your own risk. May void your warranty. Prohibited in some states. 
-
-Unfortunately this code will not work right off the shelf with the stock norns codebase (norns and norns shield) due to some USB device management stuff.
-
-But... there is a hack workaround, but it does require changes to the norns C code. It’s not hard, but steps will need to be repeated after updates, etc. See Below.
-
-###  Fates
-
-For Fates devices , I have a script in my repo which will run the fix.
-
-# Build
-
-## BOM:  
-
-8 [Adafruit NeoTrellis driver boards](https://www.adafruit.com/product/3954) [alt [Mouser](https://www.mouser.com/ProductDetail/485-3954) | [Digikey](https://www.digikey.com/products/en?keywords=1528-2712-ND) ]    
-
-8 [Button keypads](http://www.adafruit.com/product/1611) [alt [Mouser](https://www.mouser.com/ProductDetail/485-1611) | [Digikey](https://www.digikey.com/products/en?keywords=1528-1559-ND) ]    
-
-1 [Adafruit micro B USB Breakout](http://www.adafruit.com/product/1611) [alt [Mouser](https://www.mouser.com/ProductDetail/485-1833) | [Digikey](https://www.digikey.com/products/en?keywords=1528-1383-ND) ]    
-
-1 [Teensy 3.2](https://www.pjrc.com/store/teensy32.html) [alt [Adafruit](https://www.adafruit.com/product/2756) ]  
+| This is a fork of the DIY Neotrellis Grid firmware for use with the Monome Teletype. <br />The original DIY firmware can be found at https://github.com/okyeron/neotrellis-monome. |
+| ------------------------------------------------------------ |
+|                                                              |
 
 
-## before building
-
-* Test each neotrellis board individually using the Adafruit examples in the `File>Examples>Adafruit seesaw Library>Neotrellis` menu. The Basic sketch is good for testing individual boards. The `multitrellis>basic` sketch is good once you have all the boards connected and addresses assigned.
 
 
-## neotrellis building
+## Connecting your DIY Grid to Monome Teletype
 
-* Review the [Adafruit tutorial on the neotrellis](https://learn.adafruit.com/adafruit-neotrellis/arduino-code) boards. 
+### The problem
 
-* [see this video](https://www.youtube.com/watch?v=petILmGcNwQ) for an example of how to join the boards together
+At the time of writing (October 2020), the Monome Teletype won't talk to the Teensy-based Neotrellis DIY Grid out of the box. That's because Teletype firmware does not yet contain a driver for the USB CDC protocol, used by Teensy, whereas the stock Grid communicates to the Teletype via FTDI USB, which requires a microchip by the company with the same name. However, this driver is already worked on, so in the future the approach described here might become obsolete.
 
-## neotrellis address assignment
+### The solution
 
-* [see this graphic](neotrellis_addresses.jpg) for a default layout of addresses and jumper positions for 8 neotrellis boards.
+Once you built a working DIY Grid as described in the [forum](https://llllllll.co/t/diy-monome-compatible-grid-w-adafruit-neotrellis/), you can add a second USB port to it, which talks FTDI. This second port would be used for communication, while you can still use the original USB port  for power, debugging and firmware updates. Try to get a “FTDI Breakout board” with an official 231 or 232 FTDI chip, ideally from some company such as *Sparkfun* or *Watterott*, not cheap clones. 
 
-* new default address order in the code for 16x8 layout (__NOTE__ the address are in reverse order in the code - as compared to the graphic above):  
-```
-  { Adafruit_NeoTrellis(0x32), Adafruit_NeoTrellis(0x30), Adafruit_NeoTrellis(0x2F), Adafruit_NeoTrellis(0x2E)}, // top row
-  { Adafruit_NeoTrellis(0x33), Adafruit_NeoTrellis(0x31), Adafruit_NeoTrellis(0x3E), Adafruit_NeoTrellis(0x36) } // bottom row
-```
+![FTDI Breakout](img/ftdi-breakout.jpeg)
 
-* see this [neotrellis i2c address chart](NeoTrellis_Addresses.txt) if you want to define your own addresses
+They would cost around $12. Make sure to choose the 3.3V variant, or a board with a switch allowing you to switch to 3.3V mode (don’t forget to do that)
 
-* Don't worry about the INT pin - it's not used in the grid software.
+Then download the FT PROG tool [available on the FTDI website](https://www.ftdichip.com/Support/Utilities.htm#FT_PROG) and connect the breakout to your computer. I think for this step you need a Windows PC, I don't think the tool is available for Mac or Linux. However, there are alternative methods for reading and programming the EEPROM of FTDI chips, [described in this tutorial](https://waterpigs.co.uk/articles/ftdi-configure-mac-linux/). 
 
-## firmware flashing
+Press “Devices”. The adapter should show. There a several pages of configuration. Open the section “USB device descriptor”, chose the option “Custom VID/PID”, and make sure that VID and PID are **ID 0403 and 6001** respectively. If not, change them, and then chose “Program device” from the context menu or toolbar (if you bought some official board, VID should already be correct, but the PIDs for adapters vary, if it is 6015, it needs to be changed to 6001). That step should save the changes permanently.
 
-For the Teensy firmware - be sure you have Arduino settings `Tools -> USB Type` set to `Serial`
 
-Not critical, but set `Tools -> CPU Speed` to `120 MHz (overclock)`
 
-For reference: [here's a forum post on how to flash Teensy firmware](https://llllllll.co/t/how-to-flash-the-firmware-on-a-teensy-micro-controller/20317)
+![FT_PROG](img/ftprog.jpeg)
 
-## troubleshooting / testing 
 
-* Be sure you have the Adafruit Seesaw libraries installed and are up to date (via the Arduino Library Manager)
 
-* Be aware - the multitrellis array will fail to initialize if the addresses are wrong, or the wrong number of boards are attached.
+Next go to the USB String descriptors page, change the manufacturer name there to “**monome**”, and program.
 
-* There are Teensy specific i2c_t3 example sketches which can be used to double check your i2c addresses. See `File>Examples>i2c_t3>basic_scanner` for more.
+Look for the “serial number” page, turn off auto-generation of the serial number (uncheck checkbox), and enter a number like **m00000000**. The first small “m” is important here. Program.
 
-* use [multitrellis_test](multitrellis_test/multitrellis_test.ino) sketch to test fully assembled grid before flashing neotrellis_monome_teensy.
+Take out the adapter, plug it in again, press again on “Devices” in FT PROG, and check that everything was saved correctly. You can also use tools like [USBDeview](https://www.nirsoft.net/utils/usb_devices_view.html) for checking USB properties.
 
-## build help / support / troubleshooting
+One of my adapters, which was very cheap, would support every step above, but not remember the changes. If the same happens to you, you need to try another adapter.
 
-[see this thread](https://llllllll.co/t/diy-monome-compatible-grid-w-adafruit-neotrellis/28106?u=okyeron) on the lines forum for assistance.
+Now solder the breakout box to the Teensy in the DIY Grid, in addition to the existing breakout. I would recommend to just to use jumper wires, so you can remove the breakout box if needed. If you need female or male jumper wires depends on your exact model, there are those with male and female sockets. You need three cables. Connect GND to GND, RX to TX1, TX to RX1. (On some adapters it says RXI and TXO, those are the same connections). DTR, CTS and VCC don’t need to be connected.
 
-## alternate firmware for color palettes 
+![Wiring](img/wiring.jpeg)
 
-https://github.com/oldmanfury/neotrellis-grid-paletted
+Later you might want to integrate this second port in the Grid.
 
-## norns shield
+### Changing the Teensy Grid firmware
 
-If you're on norns shield with 200218 or later do the following (probably a good idea to update first anyway).
+**You can skip the following steps, if you are using the branched DIY Grid firmware for Teletype [found in this repository](neotrellis_monome_teensy/)**. This section is left for those who want to repeat the mod based on more current versions of the DIY Grid.
 
-NOTE - Be aware this is a hack/workaround and is not officially supported.
-Proceed at your own risk
+First open the Neotrellis Grid Teensy firmware “neotrellis_monome_teensy” in the Arduino IDE.
+In the first tab, look for Serial.begin(115200); and add a Serial1.begin(57600); under it.
 
-NOTE 2 - this workaround will be erased with any norns system update. Re-apply after system updates.
+Search and replace Serial. with Serial1. in all open tabs, except for the debug tab.
+
+In *MonomeSerialDevice.cpp* look for the lines
 
 ```
-cd ~/
-sudo apt-get update
-sudo apt-get install libncurses5-dev libncursesw5-dev
-wget https://raw.githubusercontent.com/okyeron/fates/master/install/norns/files/device/device_monitor.c
-cd ~/norns
-git pull
-git submodule update --init --recursive
-sudo cp -f /home/we/device_monitor.c /home/we/norns/matron/src/device/device_monitor.c
-rm /home/we/device_monitor.c
-./waf clean
-./waf configure --enable-ableton-link
-./waf build
-sudo reboot
+  Serial1.write((uint8_t)0x00); // action: response, 0x00 = system
+  Serial1.write((uint8_t)0x01); // section id, 1 = led-grid, 2 = key-grid, 5 = encoder/arc	## NEED devSect variable
+  Serial1.write((uint8_t)numQuads);   // one Quad is 64 buttons
 ```
 
-## testing with serialosc on MacOS
+If you have a version of the firmware, were there only those three lines, you need to duplicate them, so that you have six Serial1.write calls. (You might want to change 0x01 to 0x02 in the second block, but it probably does not play a role.)
 
-If you already have serialosc installed/running, you may need to unload serialosc to get arduino to properly flash the teensy, then load serialosc to get Max to recognize the grid.  
+In the same file, locate the line case 0x1A, and a the following line before any Serial1.read():
+`while(!Serial1.available() ){}`, forcing the Teensy to wait for new data from the Teletype instead of rushing through it, leading to a loss of synchronization.
 
-`launchctl unload /Library/LaunchAgents/org.monome.serialosc.plist`  
-`launchctl load /Library/LaunchAgents/org.monome.serialosc.plist`  
+### Changing the Teensy board definition 
 
-Max apps for testing:  
-[Monome Home](https://github.com/monome-community/monome-home)  
-[test-grid](https://github.com/monome/serialosc.maxpat)  
+You need to do this in any case, even if you decide to use the Firmware supplied in this repository. Otherwise the communication via the FTDI port will be full of errors, leading to all kinds of mysterious light patterns. 
 
+You need to locate the file *serial1.c* in the Teensy hardware folder for the Arduino IDE.
 
-# Case / Enclosure
+- Windows: *C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy3\serial1.c* 
+- Mac: */Applications/Arduino.app/Contents/Java/hardware/teensy/avr/cores/teensy3/serial1.c*
 
-[Work in progress](<enclosure/README.md>)
+On Linux it should also be placed in the hardware folder next to the Arduino libraries folder (I am assuming that your IDE is already set up for the Teensy, detailed instructions can be found [elsewhere](https://www.pjrc.com/teensy/teensyduino.html))
 
+Look for the line
+` #define SERIAL1_RX_BUFFER_SIZE 64`
+and replace it with
+`#define SERIAL1_RX_BUFFER_SIZE 512`
 
+(On Windows you might need admin privileges to edit this file)
 
-# references
+### Flashing the firmware with Teletype support
 
-### mext / monome serial protocol
+Start the IDE and load the modified firmware on the Teensy. Alternatively, you can flash [the supplied .hex](neotrellis_monome_teensy/neotrellis_monome_teensy_16x8_ftdi_teletype_57600.hex) files.
 
-The mext protocol is used for serial communication - same as what is used in most recent monome devices.
+Write some simple Teletype Grid script in your Teletype, such as described in “[Teletype Grid Studies](https://github.com/scanner-darkly/teletype/wiki/BASIC-VISUALIZATIONS)”. Use ALT-G to verify if the grid inside the Teletype is set up correctly.
 
-### serialosc / libmonome
+Start up the grid and connect the breakout to the Teletype. Voila.
 
-`serialosc` is required for serial communication with MacOS/Windows computers and OSC devices. Linux may use `serialosc` or `libmonome` depending on the application. `libmonome` is basically driver code which also facillitates monome serial communication.
+### Special thanks to 
 
-You can get both `serialosc` and `libmonome` code from [monome github page](https://github.com/monome), and building them is well documented on official linux docs (they work for macOS as well), read part *2 Preparing your system: serialosc* (ignoring the `sudo apt-get` - I was missing `liblo`, but it's available on homebrew): [monome.org/docs/linux/](https://monome.org/docs/linux/).
+@okyeron, @frankchannel 
 
+### FAQ
 
+Q: Is it possible to make the DIY grid work with the Teletype and Norns simultaneously?
+
+A: Yes, the easiest way is to change the Teletype's baud rate from 57600 to 115200 by a one line change in the Teletype's firmware (look at *uhi_ftdi.c* in monome's libavr32)
+
+*Background*: The stock grids firmware communicates with the FTDI chip over a parallel port connection (manually clocking data in/out of the FTDI chip). This means the MCU doesn’t know/care about the serial baud rate – the FTDI chip can negotiate that with the host however it likes. So multiple baud rates should be possible with a monome grid.
+
+With the DIY grid, on the other hand, the communication between the FTDI board and the teensy is done over the serial port, so an agreed upon baud rate is necessary right from the start. 
