@@ -1,6 +1,6 @@
-| This is a fork of the DIY Neotrellis Grid firmware<br />for use with the [Monome Teletype](https://monome.org/docs/teletype/). <br />The original DIY firmware can be found at<br />https://github.com/okyeron/neotrellis-monome |
+| This is a fork of the DIY Neotrellis Grid firmware with [Monome Teletype](https://monome.org/docs/teletype/) support |
 | :----------------------------------------------------------: |
-|                                                              |
+| The original DIY firmware can be found [here](https://github.com/okyeron/neotrellis-monome) |
 
 
 
