@@ -62,7 +62,7 @@ In *MonomeSerialDevice.cpp* look for the lines
 
 If you have a version of the firmware, were there only those three lines, you need to duplicate them, so that you have six Serial1.write calls. (You might want to change 0x01 to 0x02 in the second block, but it probably does not play a role.)
 
-In the same file, locate the line case 0x1A, and a the following line before any Serial1.read():
+In the same file, locate the line case 0x1A, and add the following line before any Serial1.read():
 `while(!Serial1.available() ){}`, forcing the Teensy to wait for new data from the Teletype instead of rushing through it, leading to a loss of synchronization.
 
 ### Changing the Teensy board definition 
